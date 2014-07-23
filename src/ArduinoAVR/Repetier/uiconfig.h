@@ -177,7 +177,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 
 /** \brief Is a back key present.
@@ -303,12 +303,16 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 void ui_init_keys() {
 #if UI_HAS_KEYS!=0
   //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(5);
-  UI_KEYS_INIT_BUTTON_LOW(6);
-  UI_KEYS_INIT_BUTTON_LOW(11);
-  UI_KEYS_INIT_BUTTON_LOW(42);
-
+  //UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
+  //UI_KEYS_INIT_BUTTON_LOW(5);
+  //UI_KEYS_INIT_BUTTON_LOW(6);
+  //UI_KEYS_INIT_BUTTON_LOW(11);
+  //UI_KEYS_INIT_BUTTON_LOW(42);
+  
+  // Out-of-Filament Endswitches
+  UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_LEFT_PIN);
+  UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_RIGHT_PIN);  
+  
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
@@ -316,13 +320,13 @@ void ui_init_keys() {
 }
 void ui_check_keys(int &action) {
 #if UI_HAS_KEYS!=0
-
+ 
  //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+ //UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
+ //UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
+ //UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+ //UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
+ //UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
 //  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 #endif
@@ -346,7 +350,12 @@ inline void ui_check_slow_encoder() {
   UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
 #endif
 }
-void ui_check_slow_keys(int &action) {
+void ui_check_slow_keys(int &action) { 
+  // Out-of-Filament Endswitches
+  UI_KEYS_BUTTON_LOW(OUT_OF_FILAMENT_LEFT_PIN, UI_ACTION_OUT_OF_FILAMENT_LEFT);  
+  UI_KEYS_BUTTON_LOW(OUT_OF_FILAMENT_RIGHT_PIN, UI_ACTION_OUT_OF_FILAMENT_LEFT);  
+  
+  
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
     HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);

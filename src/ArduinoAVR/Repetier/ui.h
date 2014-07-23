@@ -153,6 +153,9 @@
 #define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
+#define UI_ACTION_OUT_OF_FILAMENT_LEFT            1900 // left filament endswitch triggered
+#define UI_ACTION_OUT_OF_FILAMENT_RIGHT           1901 // right filament endswitch triggered
+
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -164,8 +167,8 @@
 #define UI_ACTION_MENU_QUICKSETTINGS    4007
 #define UI_ACTION_MENU_EXTRUDER         4008
 #define UI_ACTION_MENU_POSITIONS        4009
-#define UI_ACTION_SHOW_MEASUREMENT		4010
-#define UI_ACTION_RESET_MEASUREMENT		4011
+//#define UI_ACTION_SHOW_MEASUREMENT		4010
+//#define UI_ACTION_RESET_MEASUREMENT		4011
 #define UI_ACTION_SET_MEASURED_ORIGIN	4012
 #define UI_ACTION_SET_P1				4013
 #define UI_ACTION_SET_P2				4014
@@ -336,13 +339,15 @@ class UIDisplay {
     uint8_t menuTop[5]; // Top row in menu
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
-    unsigned int activeAction; // action for ok/next/previous
-    unsigned int lastAction;
-    unsigned long lastSwitch; // Last time display switched pages
-    unsigned long lastRefresh;
-    unsigned int lastButtonAction;
-    unsigned long lastButtonStart;
-    unsigned long nextRepeat; // Time of next autorepeat
+    uint16_t activeAction; // action for ok/next/previous
+    uint16_t lastAction;
+    millis_t lastSwitch; // Last time display switched pages
+    millis_t lastRefresh;
+    uint16_t lastButtonAction;
+    millis_t lastButtonStart;
+    millis_t nextRepeat; // Time of next autorepeat
+    millis_t lastNextPrev; // for increasing speed settings
+    float lastNextAccumul; // Accumulated value
     unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
     void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
@@ -438,7 +443,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_D7_PIN      40
 #define UI_ENCODER_A           12
 #define UI_ENCODER_B           11
-#define UI_ENCODER_CLICK       43
+#define UI_ENCODER_CLICK       36
 #define UI_RESET_PIN           46
 #else
 #define BEEPER_PIN             37
@@ -469,13 +474,96 @@ void ui_init_keys() {
 }
 void ui_check_keys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_RESET); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 2 and 10
+
+#if FEATURE_CONTROLLER==11 // RepRap Industrial Out-Of-Filament Endswitches on RUMBA
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define UI_DISPLAY_RS_PIN      19
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  42
+#define UI_DISPLAY_D0_PIN      18
+#define UI_DISPLAY_D1_PIN      38
+#define UI_DISPLAY_D2_PIN      41
+#define UI_DISPLAY_D3_PIN      40
+#define UI_DISPLAY_D4_PIN      18
+#define UI_DISPLAY_D5_PIN      38
+#define UI_DISPLAY_D6_PIN      41
+#define UI_DISPLAY_D7_PIN      40
+#define BEEPER_TYPE 0
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {
+  // Out-of-Filament Endswitches  
+  UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_RIGHT_PIN); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_LEFT_PIN); // push button, connects gnd to pin  
+}
+void ui_check_keys(int &action) {
+  
+  // Out-of-Filament Endswitches
+  // push btns connect pin to GND
+  // (remembers last state so both keys can be handled in parallel)
+
+  // LEFT SPOOL
+  static boolean out_of_filament_left_old = false;
+  boolean        out_of_filament_left_new = false;
+  if ( READ(OUT_OF_FILAMENT_LEFT_PIN) == 0 ) { // pulled to GND
+    out_of_filament_left_new = true;  
+  } else {
+    out_of_filament_left_new = false;    
+  }
+  if( !out_of_filament_left_old && out_of_filament_left_new ) { // state changed from false to true
+    uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_LEFT);
+  }
+  out_of_filament_left_old = out_of_filament_left_new;
+  
+  // RIGHT SPOOL
+  static boolean out_of_filament_right_old = false;
+  boolean        out_of_filament_right_new = false;
+  if ( READ(OUT_OF_FILAMENT_RIGHT_PIN) == 0 ) { // pulled to GND
+    out_of_filament_right_new = true;  
+  } else {
+    out_of_filament_right_new = false;    
+  }
+  if( !out_of_filament_right_old && out_of_filament_right_new ) { // state changed from false to true
+    uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_RIGHT);
+  }
+  out_of_filament_right_old = out_of_filament_right_new;  
+    
+/*
+  static boolean out_of_filament_left = false;
+  int read_left = READ(OUT_OF_FILAMENT_LEFT_PIN);
+  if( read_left != out_of_filament_left) {
+    out_of_filament_left = !out_of_filament_left;
+    if(!read_left) { // pulled to GND
+      uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_LEFT);
+    }
+  }  
+  static boolean out_of_filament_right = false;
+  int read_right = READ(OUT_OF_FILAMENT_RIGHT_PIN);
+  if( read_right != out_of_filament_right) {
+    out_of_filament_right = !out_of_filament_right;
+    if(!read_right) { // pulled to GND
+      uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_RIGHT);
+    }
+  }    
+*/  
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 11
 
 #if FEATURE_CONTROLLER==3 // Adafruit RGB controller
 #define UI_HAS_KEYS 1

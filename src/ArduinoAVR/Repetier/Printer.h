@@ -41,11 +41,11 @@ public:
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
-    static uint8_t menuMode;
 #ifdef ENABLE_QUADRATIC_ADVANCE
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
+    static uint8_t menuMode;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
@@ -70,7 +70,6 @@ public:
     static float currentPosition[3];
     static long destinationSteps[4];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
-    static long countZSteps;					///< Count of steps from last position reset
     static long currentDeltaPositionSteps[4];
     static long maxDeltaPositionSteps;
     static long deltaDiagonalStepsSquared;
@@ -82,7 +81,7 @@ public:
     static long deltaCPosXSteps;
     static long deltaCPosYSteps;
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
     static long stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3

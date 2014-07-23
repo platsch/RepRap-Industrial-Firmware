@@ -457,24 +457,24 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 
 #ifndef __AVR_ATmega2560__
-#error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+ #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
 #endif
 
 #define X_STEP_PIN         17
 #define X_DIR_PIN          16
 #define X_ENABLE_PIN       48
 #define X_MIN_PIN          37
-#define X_MAX_PIN          36   //Max endstops default to disabled "-1"
+#define X_MAX_PIN          -1   // disabled -> pin used for out-of-filament endswitch
 
-#define Y_STEP_PIN         54
-#define Y_DIR_PIN          47
-#define Y_ENABLE_PIN       55
-#define Y_MIN_PIN          35
-#define Y_MAX_PIN          34
+#define Y_STEP_PIN         29   // Y-Stepper-Header swapped with E2 header!
+#define Y_DIR_PIN          28   // Y-Stepper-Header swapped with E2 header!
+#define Y_ENABLE_PIN       39   // Y-Stepper-Header swapped with E2 header!
+#define Y_MIN_PIN          -1   // disabled -> pin used for out-of-filament endswitch
+#define Y_MAX_PIN          34 
 
-#define Z_STEP_PIN         57
+#define Z_STEP_PIN         57 
 #define Z_DIR_PIN          56
-#define Z_ENABLE_PIN       62
+#define Z_ENABLE_PIN       62 
 #define Z_MIN_PIN          33
 #define Z_MAX_PIN          32
 
@@ -486,35 +486,38 @@ STEPPER_CURRENT_CONTROL
 #define E1_DIR_PIN         25
 #define E1_ENABLE_PIN      27
 
-#define E2_STEP_PIN        29
-#define E2_DIR_PIN         28
-#define E2_ENABLE_PIN      39
+#define E2_STEP_PIN        54   // E2 Stepper header swapped with Y header!
+#define E2_DIR_PIN         47   // E2 Stepper header swapped with Y header!
+#define E2_ENABLE_PIN      55   // E2 Stepper header swapped with Y header!
 
 #define LED_PIN            13
 
-#define FAN_PIN            7
-#define FAN1 PIN  8 // (e.g. useful for electronics fan or light on/off) on PIN 8
+#define FAN_PIN            7 
+//additional FAN1 PIN (e.g. useful for electronics fan or light on/off) on PIN 8
 
 #define PS_ON_PIN          45
 #define KILL_PIN           46
 
 #define HEATER_0_PIN       2    // EXTRUDER 1
-#define HEATER_2_PIN       3    // EXTRUDER 2
-#define HEATER_3_PIN       6    // EXTRUDER 3
+#define HEATER_1_PIN       3    // EXTRUDER 2
+#define HEATER_2_PIN       31    // EXTRUDER 3 - USED FOR CONTROLLING CHAMBER HEATER VIA EXTERNAL MOSFET BOARDS
 //optional FAN1 can be used as 4th heater output: #define HEATER_3_PIN       8    // EXTRUDER 4
-#define HEATER_1_PIN     9    // BED
+#define HEATER_3_PIN       30    // BED - CONTROLLED VIA EXTERNAL MOSFET BOARD
 
 #define TEMP_0_PIN         15   // ANALOG NUMBERING
-#define TEMP_2_PIN         14   // ANALOG NUMBERING
-#define TEMP_3_PIN         13   // ANALOG NUMBERING
+#define TEMP_1_PIN         14   // ANALOG NUMBERING
+#define TEMP_2_PIN         13   // ANALOG NUMBERING
 //optional for extruder 4 or chamber: #define TEMP_2_PIN         12   // ANALOG NUMBERING
-#define TEMP_1_PIN       11   // ANALOG NUMBERING
+#define TEMP_3_PIN         11   // ANALOG NUMBERING
 
 #define SDPOWER            -1
 #define SDSS               53
 #define SCK_PIN          52
 #define MISO_PIN         50
 #define MOSI_PIN         51
+
+#define OUT_OF_FILAMENT_LEFT_PIN     36      // Out-Of-Filament Endswitches, connected to X+ und Y- Endstop headers on RUMBA
+#define OUT_OF_FILAMENT_RIGHT_PIN    35
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,

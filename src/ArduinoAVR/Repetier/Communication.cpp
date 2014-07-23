@@ -113,6 +113,7 @@ FSTRINGVALUE(Com::tZJerkColon," ZJerk:")
 FSTRINGVALUE(Com::tLinearStepsColon," linear steps:")
 FSTRINGVALUE(Com::tQuadraticStepsColon," quadratic steps:")
 FSTRINGVALUE(Com::tCommaSpeedEqual,", speed=")
+FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
@@ -122,7 +123,6 @@ FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
 FSTRINGVALUE(Com::tMeasureOriginReset,"Measured origin set. Measurement reset.")
 FSTRINGVALUE(Com::tMeasurementAbortedOrigin,"Origin measurement cannot be set.  Use only Z-Cartesian (straight up and down) movements and try again.")
-FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
 FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
 FSTRINGVALUE(Com::tTower1,"Tower 1:")
@@ -200,11 +200,6 @@ FSTRINGVALUE(Com::tDBGDeltaMaxDS,"Max DS:")
 FSTRINGVALUE(Com::tDBGDeltaStepsPerSegment,"Steps Per Segment:")
 FSTRINGVALUE(Com::tDBGDeltaVirtualAxisSteps,"Virtual axis steps:")
 #endif
-#ifdef STEP_COUNTER
-FSTRINGVALUE(Com::tDBGDeltaMeasurerDelta,"Measure/delta =")
-FSTRINGVALUE(Com::tDBGDeltaMeasurementReset,"Measurement reset.")
-FSTRINGVALUE(Com::tDBGDeltaMeasuredOriginSet,"Measured origin set. Measurement reset.")
-#endif // STEP_COUNTER
 #ifdef DEBUG_STEPCOUNT
 FSTRINGVALUE(Com::tDBGMissedSteps,"Missed steps:")
 #endif // DEBUG_STEPCOUNT
