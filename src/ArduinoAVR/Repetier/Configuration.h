@@ -257,7 +257,7 @@ L is the linear factor and seems to be working better then the quadratic depende
 /* Motor steps to remove backlash for advance alorithm. These are the steps
 needed to move the motor cog in reverse direction until it hits the driving
 cog. Direct drive extruder need 0. */
-#define EXT0_ADVANCE_BACKLASH_STEPS 0
+#define EXT0_ADVANCE_BACKLASH_STEPS 61
 /** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
 */
 #define EXT0_WAIT_RETRACT_TEMP 		150
@@ -305,7 +305,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_PID_MAX 255
 #define EXT1_ADVANCE_K 0.0f
 #define EXT1_ADVANCE_L 0.0f
-#define EXT1_ADVANCE_BACKLASH_STEPS 0
+#define EXT1_ADVANCE_BACKLASH_STEPS 61
 #define EXT1_WAIT_RETRACT_TEMP 	150
 #define EXT1_WAIT_RETRACT_UNITS	0
 #define EXT1_SELECT_COMMANDS ""
