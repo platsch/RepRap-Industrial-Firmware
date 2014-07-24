@@ -577,12 +577,12 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_X_DIR_PIN          16
 #define ORIG_X_ENABLE_PIN       48
 #define ORIG_X_MIN_PIN          37
-#define ORIG_X_MAX_PIN          36   //Max endstops default to disabled "-1"
+#define ORIG_X_MAX_PIN          -1   //disabled -> pin used for out-of-filament endswitch
 
-#define ORIG_Y_STEP_PIN         54
-#define ORIG_Y_DIR_PIN          47
-#define ORIG_Y_ENABLE_PIN       55
-#define ORIG_Y_MIN_PIN          35
+#define ORIG_Y_STEP_PIN         29
+#define ORIG_Y_DIR_PIN          28
+#define ORIG_Y_ENABLE_PIN       39
+#define ORIG_Y_MIN_PIN          -1   //disabled -> pin used for out-of-filament endswitch
 #define ORIG_Y_MAX_PIN          34
 
 #define ORIG_Z_STEP_PIN         57
@@ -599,9 +599,9 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E1_DIR_PIN         25
 #define ORIG_E1_ENABLE_PIN      27
 
-#define ORIG_E2_STEP_PIN        29
-#define ORIG_E2_DIR_PIN         28
-#define ORIG_E2_ENABLE_PIN      39
+#define ORIG_E2_STEP_PIN        54    // E2 Stepper header swapped with Y header!
+#define ORIG_E2_DIR_PIN         47    // E2 Stepper header swapped with Y header!
+#define ORIG_E2_ENABLE_PIN      55    // E2 Stepper header swapped with Y header!
 
 #define LED_PIN            13
 
@@ -611,22 +611,27 @@ STEPPER_CURRENT_CONTROL
 #define PS_ON_PIN          45
 
 #define HEATER_0_PIN       2    // EXTRUDER 1
-#define HEATER_2_PIN       3    // EXTRUDER 2
-#define HEATER_3_PIN       6    // EXTRUDER 3
+#define HEATER_1_PIN       3    // EXTRUDER 2
+#define HEATER_2_PIN       31    // EXTRUDER 3 - USED FOR CONTROLLING CHAMBER HEATER VIA EXTERNAL MOSFET BOARDS
+#define HEATER_3_PIN       30    // BED - CONTROLLED VIA EXTERNAL MOSFET BOARD
 //optional FAN1 can be used as 4th heater output: #define HEATER_4_PIN       8    // EXTRUDER 4
-#define HEATER_1_PIN       9    // BED
+
 
 #define TEMP_0_PIN         15   // ANALOG NUMBERING
-#define TEMP_2_PIN         14   // ANALOG NUMBERING
-#define TEMP_3_PIN         13   // ANALOG NUMBERING
+#define TEMP_1_PIN         14   // ANALOG NUMBERING
+#define TEMP_2_PIN         13   // ANALOG NUMBERING
+#define TEMP_3_PIN         11   // ANALOG NUMBERING
 //optional for extruder 4 or chamber: #define TEMP_2_PIN         12   // ANALOG NUMBERING
-#define TEMP_1_PIN       11   // ANALOG NUMBERING
+
 
 #define SDPOWER            -1
 #define SDSS               53
 #define SCK_PIN          52
 #define MISO_PIN         50
 #define MOSI_PIN         51
+
+#define OUT_OF_FILAMENT_LEFT_PIN     36      // Out-Of-Filament Endswitches, connected to X+ und Y- Endstop headers on RUMBA
+#define OUT_OF_FILAMENT_RIGHT_PIN    35
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
