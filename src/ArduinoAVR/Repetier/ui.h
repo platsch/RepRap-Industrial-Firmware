@@ -159,6 +159,9 @@
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 
+#define UI_ACTION_OUT_OF_FILAMENT_LEFT  1900 // left filament endswitch triggered
+#define UI_ACTION_OUT_OF_FILAMENT_RIGHT 1901 // right filament endswitch triggered
+
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
 #define UI_ACTION_MENU_ZPOS             4002
@@ -522,6 +525,91 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 2 and 10
+
+#if FEATURE_CONTROLLER==11 // RepRap Industrial Out-Of-Filament Endswitches on RUMBA
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define UI_DISPLAY_RS_PIN      19
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  42
+#define UI_DISPLAY_D0_PIN      18
+#define UI_DISPLAY_D1_PIN      38
+#define UI_DISPLAY_D2_PIN      41
+#define UI_DISPLAY_D3_PIN      40
+#define UI_DISPLAY_D4_PIN      18
+#define UI_DISPLAY_D5_PIN      38
+#define UI_DISPLAY_D6_PIN      41
+#define UI_DISPLAY_D7_PIN      40
+#define BEEPER_TYPE 0
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {
+  // Out-of-Filament Endswitches  
+  UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_RIGHT_PIN); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_LEFT_PIN); // push button, connects gnd to pin  
+}
+void ui_check_keys(int &action) {
+  
+  // Out-of-Filament Endswitches
+  // push btns connect pin to GND
+  // (remembers last state so both keys can be handled in parallel)
+
+  // LEFT SPOOL
+  static boolean out_of_filament_left_old = false;
+  boolean        out_of_filament_left_new = false;
+  if ( READ(OUT_OF_FILAMENT_LEFT_PIN) == 0 ) { // pulled to GND
+    out_of_filament_left_new = true;  
+  } else {
+    out_of_filament_left_new = false;    
+  }
+  if( !out_of_filament_left_old && out_of_filament_left_new ) { // state changed from false to true
+    uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_LEFT);
+  }
+  out_of_filament_left_old = out_of_filament_left_new;
+  
+  // RIGHT SPOOL
+  static boolean out_of_filament_right_old = false;
+  boolean        out_of_filament_right_new = false;
+  if ( READ(OUT_OF_FILAMENT_RIGHT_PIN) == 0 ) { // pulled to GND
+    out_of_filament_right_new = true;  
+  } else {
+    out_of_filament_right_new = false;    
+  }
+  if( !out_of_filament_right_old && out_of_filament_right_new ) { // state changed from false to true
+    uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_RIGHT);
+  }
+  out_of_filament_right_old = out_of_filament_right_new;  
+/*
+  static boolean out_of_filament_left = false;
+  int read_left = READ(OUT_OF_FILAMENT_LEFT_PIN);
+  if( read_left != out_of_filament_left) {
+    out_of_filament_left = !out_of_filament_left;
+    if(!read_left) { // pulled to GND
+      uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_LEFT);
+    }
+  }  
+  static boolean out_of_filament_right = false;
+  int read_right = READ(OUT_OF_FILAMENT_RIGHT_PIN);
+  if( read_right != out_of_filament_right) {
+    out_of_filament_right = !out_of_filament_right;
+    if(!read_right) { // pulled to GND
+      uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_RIGHT);
+    }
+  }    
+*/  
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 11
+    
+
+
 
 #if FEATURE_CONTROLLER==3 // Adafruit RGB controller
 #define UI_HAS_KEYS 1
