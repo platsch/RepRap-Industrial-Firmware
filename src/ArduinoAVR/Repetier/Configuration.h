@@ -207,13 +207,13 @@ Overridden if EEPROM activated.*/
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 45
+#define EXT0_MAX_FEEDRATE 24
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
 #define EXT0_MAX_START_FEEDRATE 5
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 10000
+#define EXT0_MAX_ACCELERATION 3000
 /** Type of heat manager for this extruder.
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -258,7 +258,7 @@ the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
 L is the linear factor and seems to be working better then the quadratic dependency.
 */
 #define EXT0_ADVANCE_K 0.0f
-#define EXT0_ADVANCE_L 0.0f
+#define EXT0_ADVANCE_L 50.0f
 /* Motor steps to remove backlash for advance alorithm. These are the steps
 needed to move the motor cog in reverse direction until it hits the driving
 cog. Direct drive extruder need 0. */
@@ -294,9 +294,9 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_INVERSE true
 #define EXT1_ENABLE_PIN E1_ENABLE_PIN
 #define EXT1_ENABLE_ON false
-#define EXT1_MAX_FEEDRATE 45
+#define EXT1_MAX_FEEDRATE 24
 #define EXT1_MAX_START_FEEDRATE 5
-#define EXT1_MAX_ACCELERATION 10000
+#define EXT1_MAX_ACCELERATION 3000
 #define EXT1_HEAT_MANAGER 3
 #define EXT1_WATCHPERIOD 3
 #define EXT1_PID_INTEGRAL_DRIVE_MAX 140
@@ -306,7 +306,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_PID_D 58.32
 #define EXT1_PID_MAX 255
 #define EXT1_ADVANCE_K 0.0f
-#define EXT1_ADVANCE_L 0.0f
+#define EXT1_ADVANCE_L 50.0f
 #define EXT1_ADVANCE_BACKLASH_STEPS 61
 #define EXT1_WAIT_RETRACT_TEMP 150
 #define EXT1_WAIT_RETRACT_UNITS 0
