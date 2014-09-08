@@ -617,8 +617,8 @@ on this endstop.
 #define max_software_endstop_r true
 
 //If true, axis won't move to coordinates less than zero.
-#define min_software_endstop_x true
-#define min_software_endstop_y true
+#define min_software_endstop_x false
+#define min_software_endstop_y false
 #define min_software_endstop_z true
 
 //If true, axis won't move to coordinates greater than the defined lengths below.
@@ -652,14 +652,14 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 300
-#define Y_MAX_LENGTH 275
-#define Z_MAX_LENGTH 288
+#define X_MAX_LENGTH 280
+#define Y_MAX_LENGTH 295
+#define Z_MAX_LENGTH 290
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
 #define X_MIN_POS -40
-#define Y_MIN_POS -90
+#define Y_MIN_POS -115
 #define Z_MIN_POS 0
 
 // ##########################################################################################
@@ -1149,7 +1149,7 @@ The following settings override uiconfig.h!
 14 = OpenHardware.co.za LCD2004 V2014
 15 = Sanguinololu + Panelolu2
 */
-#define FEATURE_CONTROLLER 11
+#define FEATURE_CONTROLLER 99
 
 /**
 Select the language to use.

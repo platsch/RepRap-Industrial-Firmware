@@ -161,6 +161,8 @@
 
 #define UI_ACTION_OUT_OF_FILAMENT_LEFT  1900 // left filament endswitch triggered
 #define UI_ACTION_OUT_OF_FILAMENT_RIGHT 1901 // right filament endswitch triggered
+#define UI_ACTION_CHAMBER_HEATER_OVERTEMP_LEFT  1902 // left chamber heater over-temp safety switch
+#define UI_ACTION_CHAMBER_HEATER_OVERTEMP_RIGHT 1903 // right chamber heater over-temp safety switch
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -526,7 +528,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 2 and 10
 
-#if FEATURE_CONTROLLER==11 // RepRap Industrial Out-Of-Filament Endswitches on RUMBA
+#if FEATURE_CONTROLLER==99 // RepRap Industrial Out-Of-Filament Endswitches on RUMBA
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE 1
@@ -552,6 +554,10 @@ void ui_init_keys() {
   // Out-of-Filament Endswitches  
   UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_RIGHT_PIN); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_LEFT_PIN); // push button, connects gnd to pin  
+
+  // Chamber Heater overtemp safety switches
+  UI_KEYS_INIT_BUTTON_LOW(CHAMBER_HEATER_OVERTEMP_LEFT_PIN); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(CHAMBER_HEATER_OVERTEMP_RIGHT_PIN); // push button, connects gnd to pin  
 }
 void ui_check_keys(int &action) {
   
@@ -583,7 +589,22 @@ void ui_check_keys(int &action) {
   if( !out_of_filament_right_old && out_of_filament_right_new ) { // state changed from false to true
     uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_RIGHT);
   }
-  out_of_filament_right_old = out_of_filament_right_new;  
+  out_of_filament_right_old = out_of_filament_right_new; 
+
+  // LEFT CHAMBER HEATER OVERTEMP SWITCH
+  static boolean chamber_heater_overtemp_left = false;
+  if ( READ(CHAMBER_HEATER_OVERTEMP_LEFT_PIN) == 1 && !chamber_heater_overtemp_left) { // switch is open, not pulled to GND anymore
+    chamber_heater_overtemp_left = true;
+    uid.executeAction(UI_ACTION_CHAMBER_HEATER_OVERTEMP_LEFT);
+  }
+
+  // RIGHT CHAMBER HEATER OVERTEMP SWITCH
+  static boolean chamber_heater_overtemp_right = false;
+  if ( READ(CHAMBER_HEATER_OVERTEMP_RIGHT_PIN) == 1 && !chamber_heater_overtemp_right) { // switch is open, not pulled to GND anymore
+    chamber_heater_overtemp_right = true;
+    uid.executeAction(UI_ACTION_CHAMBER_HEATER_OVERTEMP_RIGHT);
+  }
+
 /*
   static boolean out_of_filament_left = false;
   int read_left = READ(OUT_OF_FILAMENT_LEFT_PIN);
@@ -606,7 +627,7 @@ void ui_check_keys(int &action) {
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
-#endif // Controller 11
+#endif // Controller 99
     
 
 

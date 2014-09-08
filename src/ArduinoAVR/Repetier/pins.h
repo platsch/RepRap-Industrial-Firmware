@@ -632,6 +632,8 @@ STEPPER_CURRENT_CONTROL
 
 #define OUT_OF_FILAMENT_LEFT_PIN     36      // Out-Of-Filament Endswitches, connected to X+ und Y- Endstop headers on RUMBA
 #define OUT_OF_FILAMENT_RIGHT_PIN    35
+#define CHAMBER_HEATER_OVERTEMP_LEFT_PIN  4   // Chamber Heater safety switches, connected to pin 5/6 of EXP3 header on RUMBA
+#define CHAMBER_HEATER_OVERTEMP_RIGHT_PIN  5
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
