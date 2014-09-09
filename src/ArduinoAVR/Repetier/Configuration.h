@@ -209,7 +209,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 #define EXT0_MAX_START_FEEDRATE 5
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 10000
+#define EXT0_MAX_ACCELERATION 3000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -294,7 +294,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_ENABLE_ON false
 #define EXT1_MAX_FEEDRATE 45
 #define EXT1_MAX_START_FEEDRATE 5
-#define EXT1_MAX_ACCELERATION 10000
+#define EXT1_MAX_ACCELERATION 3000
 #define EXT1_HEAT_MANAGER 3
 #define EXT1_WATCHPERIOD 3
 #define EXT1_PID_INTEGRAL_DRIVE_MAX 140
