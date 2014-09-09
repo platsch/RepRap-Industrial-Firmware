@@ -187,7 +187,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
-#define EXT0_TEMPSENSOR_TYPE 8
+#define EXT0_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // WHich pin enables the heater
@@ -284,7 +284,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_Y_OFFSET -21   // 1/16 microstepping
 //  #define EXT1_STEPS_PER_MM 2002.77      // 1/32 microstepping
 #define EXT1_STEPS_PER_MM 500.69   // 1/8 microstepping
-#define EXT1_TEMPSENSOR_TYPE 8
+#define EXT1_TEMPSENSOR_TYPE 1
 #define EXT1_TEMPSENSOR_PIN TEMP_1_PIN 
 #define EXT1_HEATER_PIN HEATER_1_PIN 
 #define EXT1_STEP_PIN E1_STEP_PIN
