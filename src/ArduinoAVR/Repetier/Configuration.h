@@ -258,7 +258,7 @@ the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
 L is the linear factor and seems to be working better then the quadratic dependency.
 */
 #define EXT0_ADVANCE_K 0.0f
-#define EXT0_ADVANCE_L 15.0f
+#define EXT0_ADVANCE_L 0.0f
 /* Motor steps to remove backlash for advance alorithm. These are the steps
 needed to move the motor cog in reverse direction until it hits the driving
 cog. Direct drive extruder need 0. */
@@ -306,7 +306,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_PID_D 58.32
 #define EXT1_PID_MAX 255
 #define EXT1_ADVANCE_K 0.0f
-#define EXT1_ADVANCE_L 15.0f
+#define EXT1_ADVANCE_L 0.0f
 #define EXT1_ADVANCE_BACKLASH_STEPS 61
 #define EXT1_WAIT_RETRACT_TEMP 150
 #define EXT1_WAIT_RETRACT_UNITS 0
@@ -654,7 +654,7 @@ on this endstop.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
 #define X_MAX_LENGTH 280
 #define Y_MAX_LENGTH 295
-#define Z_MAX_LENGTH 290
+#define Z_MAX_LENGTH 295
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
