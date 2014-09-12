@@ -846,14 +846,14 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high!
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 200
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 200
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 200
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 200
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 200
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 200
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 
 /** \brief Maximum allowable jerk.
 
