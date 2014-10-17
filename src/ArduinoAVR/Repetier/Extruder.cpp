@@ -383,6 +383,9 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();
+#if USE_ADVANCE
+    HAL::resetExtruderDirection();
+#endif    
 #if NUM_EXTRUDER>1
     if(executeSelect) // Run only when changing
         GCode::executeFString(Extruder::current->selectCommands);
