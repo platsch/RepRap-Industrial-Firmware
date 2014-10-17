@@ -923,7 +923,7 @@ Without a correct adjusted advance algorithm, you get blobs at points, where acc
 effect increases with speed and acceleration difference. Using the advance method decreases this effect.
 For more informations, read the wiki.
 */
-#define USE_ADVANCE
+#define USE_ADVANCE 1
 
 /** \brief enables quadratic component.
 
