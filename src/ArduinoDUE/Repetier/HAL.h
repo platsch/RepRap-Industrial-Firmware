@@ -48,6 +48,7 @@
 
 // force SdFat to use HAL (whether or not using SW spi)
 #undef  SOFTWARE_SPI
+#define TIMER0_PRESCALE 128
 
 // Some structures assume no padding, need to add this attribute on ARM
 #define PACK    __attribute__ ((packed))
@@ -96,10 +97,10 @@ typedef char prog_char;
 #define DELAY_TIMER_CLOCK       TC_CMR_TCCLKS_TIMER_CLOCK2
 #define DELAY_TIMER_PRESCALE    8
 
-#define SERIAL_BUFFER_SIZE      1024
-#define SERIAL_PORT             UART
-#define SERIAL_IRQ              ID_UART
-#define SERIAL_PORT_VECTOR      UART_Handler
+//#define SERIAL_BUFFER_SIZE      1024
+//#define SERIAL_PORT             UART
+//#define SERIAL_IRQ              ID_UART
+//#define SERIAL_PORT_VECTOR      UART_Handler
 
 // TWI1 if SDA pin = 20  TWI0 for pin = 70
 #define TWI_INTERFACE   		TWI1	    
@@ -124,7 +125,7 @@ typedef char prog_char;
 #define ADC_ISR_EOC(channel)    (0x1u << channel) 
 #define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}  
 
-#define PULLUP(IO,v)            pinMode(IO, (v ? INPUT_PULLUP : INPUT)); //WRITE(IO, v)
+#define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL       250  // 1sec  (~16 seconds max)
@@ -139,7 +140,9 @@ typedef char prog_char;
 #endif
 
 #define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
-#define	WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP) 
+//#define	WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
+#define	WRITE(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
+ 
 #define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
     PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0) 
 #define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
@@ -148,9 +151,9 @@ typedef char prog_char;
 #define LOW         0
 #define HIGH        1
 
-#define BEGIN_INTERRUPT_PROTECTED noInterrupts();
-#define END_INTERRUPT_PROTECTED interrupts();
-#define ESCAPE_INTERRUPT_PROTECTED  interrupts();
+#define BEGIN_INTERRUPT_PROTECTED __disable_irq(); //noInterrupts();
+#define END_INTERRUPT_PROTECTED __enable_irq(); //interrupts();
+#define ESCAPE_INTERRUPT_PROTECTED  __enable_irq(); //interrupts();
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
@@ -169,14 +172,19 @@ typedef char prog_char;
 #define I2C_WRITE   0
 
 #ifndef DUE_SOFTWARE_SPI
-    static int spiDueDividors[] = {10,21,42,84,168,255,255};
+    extern int spiDueDividors[];
 #endif
 
 static uint32_t    tone_pin;
 
+/** Set max. frequency to 150000Hz */
+#define LIMIT_INTERVAL (F_CPU/150000)
+
+
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
+typedef int flag8_t;
 
 #define RFSERIAL Serial
 
@@ -202,7 +210,6 @@ union eeval_t {
     uint16_t    s;
     long        l;
 } PACK;
-
 
 class HAL
 {
@@ -232,7 +239,8 @@ public:
     }
     static inline unsigned int ComputeV(long timer,long accel)
     {
-        return ((timer>>8)*accel)>>10;
+        return static_cast<unsigned int>((static_cast<int64_t>(timer)*static_cast<int64_t>(accel))>>18);
+        //return ((timer>>8)*accel)>>10;
     }
 // Multiply two 16 bit values and return 32 bit result
     static inline unsigned long mulu16xu16to32(unsigned int a,unsigned int b)
@@ -261,14 +269,17 @@ public:
         if (mode == INPUT) {SET_INPUT(pin);}
         else SET_OUTPUT(pin);
     }
-    static long CPUDivU2(unsigned int divisor);
+    static long CPUDivU2(speed_t divisor) {
+      return F_CPU/divisor;
+    }
     static inline void delayMicroseconds(unsigned int delayUs)
     {
         microsecondsWait(delayUs);
     }
     static inline void delayMilliseconds(unsigned int delayMs)
     {
-        Wait(delayMs);
+        //Wait(delayMs);
+        delay(delayMs);
     }
     static inline void tone(uint8_t pin,int frequency) {
         // set up timer counter 1 channel 0 to generate interrupts for
@@ -528,115 +539,21 @@ public:
 #else
 
    // hardware SPI
-   static inline void spiBegin()
-   {
-        // Configre SPI pins
-        PIO_Configure(
-           g_APinDescription[SPI_PIN].pPort,
-           g_APinDescription[SPI_PIN].ulPinType,
-           g_APinDescription[SPI_PIN].ulPin,
-           g_APinDescription[SPI_PIN].ulPinConfiguration);
-        PIO_Configure(
-           g_APinDescription[SCK_PIN].pPort,
-           g_APinDescription[SCK_PIN].ulPinType,
-           g_APinDescription[SCK_PIN].ulPin,
-           g_APinDescription[SCK_PIN].ulPinConfiguration);
-        PIO_Configure(
-           g_APinDescription[MOSI_PIN].pPort,
-           g_APinDescription[MOSI_PIN].ulPinType,
-           g_APinDescription[MOSI_PIN].ulPin,
-           g_APinDescription[MOSI_PIN].ulPinConfiguration);
-        PIO_Configure(
-           g_APinDescription[MISO_PIN].pPort,
-           g_APinDescription[MISO_PIN].ulPinType,
-           g_APinDescription[MISO_PIN].ulPin,
-           g_APinDescription[MISO_PIN].ulPinConfiguration);
-
-        // set master mode, peripheral select, fault detection
-        SPI_Configure(SPI0, SPI_CHAN, SPI_MR_MSTR | 
-                     SPI_MR_MODFDIS | SPI_MR_PS);
-   }
+   static void spiBegin();
    // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
    // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
-    static inline void spiInit(uint8_t spiClock) 
-   {
-        // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
-        SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
-                         SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | 
-                         SPI_CSR_DLYBCT(1));
-        SPI_Enable(SPI0);
-   }
+    static void spiInit(uint8_t spiClock);
     // Write single byte to SPI
-    static inline void spiSend(byte b) {
-        // wait for transmit register empty
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-        // write byte with address and end transmission flag
-        SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(0) | SPI_TDR_LASTXFER;
-
-        // wait for receive register 
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-        // clear status
-        SPI0->SPI_RDR;
-    }
-   static inline void spiSend(const uint8_t* buf , size_t n)
-   {
-       if (n == 0) return;
-       for (int i=0; i<n-1; i++)
-       {
-           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-           SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(0);
-           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-           SPI0->SPI_RDR;
-       }
-       spiSend(buf[n-1]);
-   }
-
+    static void spiSend(byte b);
+   static void spiSend(const uint8_t* buf , size_t n);
     // Read single byte from SPI
-   static inline uint8_t spiReceive()
-   {
-        // wait for transmit register empty
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-        // write dummy byte with address and end transmission flag
-        SPI0->SPI_TDR = 0x000000FF | SPI_PCS(0) | SPI_TDR_LASTXFER;
-
-        // wait for receive register 
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-        // get byte from receive register
-        return SPI0->SPI_RDR;
-   }
+   static uint8_t spiReceive();
     // Read from SPI into buffer
-   static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte) 
-   {     
-       if (nbyte-- == 0) return;
-
-       for (int i=0; i<nbyte; i++)
-        {
-           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-           SPI0->SPI_TDR = 0x000000FF | SPI_PCS(0);
-           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-           buf[i] = SPI0->SPI_RDR;
-        }
-       buf[nbyte] = spiReceive();
-   }
+   static void spiReadBlock(uint8_t*buf,uint16_t nbyte);
 
     // Write from buffer to SPI
 
-   static inline __attribute__((always_inline))
-   void spiSendBlock(uint8_t token, const uint8_t* buf)
-   {
-       while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-       SPI0->SPI_TDR = (uint32_t)token | SPI_PCS(0);
-       while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-       SPI0->SPI_RDR;
-       for (int i=0; i<511; i++)
-       {
-           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-           SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(0);
-           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-           SPI0->SPI_RDR;
-       }
-       spiSend(buf[511]);
-   }
+   static void spiSendBlock(uint8_t token, const uint8_t* buf);
 #endif  /*DUE_SOFTWARE_SPI*/
 
     // I2C Support

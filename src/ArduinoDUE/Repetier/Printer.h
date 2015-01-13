@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -22,6 +22,10 @@
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
+union floatLong {
+    float f;
+    long l;
+};
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
 #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
@@ -31,6 +35,12 @@
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
 #define PRINTER_FLAG0_ZPROBEING             64
 #define PRINTER_FLAG0_LARGE_MACHINE         128
+#define PRINTER_FLAG1_HOMED                 1
+#define PRINTER_FLAG1_AUTOMOUNT             2
+#define PRINTER_FLAG1_ANIMATION             4
+#define PRINTER_FLAG1_ALLKILLED             8
+#define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
+#define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
 
 class Printer
 {
@@ -41,17 +51,17 @@ public:
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
-    static uint8_t menuMode;
 #ifdef ENABLE_QUADRATIC_ADVANCE
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
+    static uint8_t menuMode;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
-    static long maxAccelerationMMPerSquareSecond[];
-    static long maxTravelAccelerationMMPerSquareSecond[];
+    static float maxAccelerationMMPerSquareSecond[];
+    static float maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
     static unsigned long maxTravelAccelerationStepsPerSquareSecond[];
     static uint8_t relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
@@ -60,7 +70,7 @@ public:
     static uint8_t unitIsInches;
 
     static uint8_t debugLevel;
-    static uint8_t flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
+    static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t stepsPerTimerCall;
     static unsigned long interval;    ///< Last step duration in ticks.
     static unsigned long timer;              ///< used for acceleration/deceleration timing
@@ -68,21 +78,26 @@ public:
     static float coordinateOffset[3];
     static long currentPositionSteps[4];     ///< Position in steps from origin.
     static float currentPosition[3];
+    static float lastCmdPos[3]; ///< Last coordinates send by gcodes
     static long destinationSteps[4];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
-    static long countZSteps;					///< Count of steps from last position reset
     static long currentDeltaPositionSteps[4];
     static long maxDeltaPositionSteps;
-    static long deltaDiagonalStepsSquared;
-    static float deltaDiagonalStepsSquaredF;
+    static floatLong deltaDiagonalStepsSquaredA;
+    static floatLong deltaDiagonalStepsSquaredB;
+    static floatLong deltaDiagonalStepsSquaredC;
+    static float deltaMaxRadiusSquared;
     static long deltaAPosXSteps;
     static long deltaAPosYSteps;
     static long deltaBPosXSteps;
     static long deltaBPosYSteps;
     static long deltaCPosXSteps;
     static long deltaCPosYSteps;
+    static long realDeltaPositionSteps[3];
+    static int16_t travelMovesPerSecond;
+    static int16_t printMovesPerSecond;
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3
@@ -97,6 +112,7 @@ public:
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
+    static signed char zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -115,12 +131,12 @@ public:
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM != 3
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
-    static unsigned int vMaxReached;         ///< Maximumu reached speed
+    static speed_t vMaxReached;         ///< Maximumu reached speed
     static unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;            ///< mm of filament printed since counting started
     static uint8_t wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
@@ -134,20 +150,29 @@ public:
     static long totalStepsRemaining;
 #endif
 #if FEATURE_MEMORY_POSITION
-    static long memoryX;
-    static long memoryY;
-    static long memoryZ;
-    static long memoryE;
+    static float memoryX;
+    static float memoryY;
+    static float memoryZ;
+    static float memoryE;
 #endif
 #ifdef XY_GANTRY
-    static char motorX;
-    static char motorY;
+    static int8_t motorX;
+    static int8_t motorY;
+#endif
+#ifdef DEBUG_SEGMENT_LENGTH
+    static float maxRealSegmentLength;
+#endif
+#ifdef DEBUG_REAL_JERK
+    static float maxRealJerk;
 #endif
     static inline void setMenuMode(uint8_t mode,bool on) {
         if(on)
             menuMode |= mode;
         else
             menuMode &= ~mode;
+    }
+    static inline bool isMenuMode(uint8_t mode) {
+        return (menuMode & mode)==mode;
     }
     static inline bool debugEcho()
     {
@@ -284,6 +309,18 @@ public:
 #endif
         }
     }
+    static inline bool getZDirection()
+    {
+        return ((READ(Z_DIR_PIN)!=0) ^ INVERT_Z_DIR);
+    }
+    static inline bool getYDirection()
+    {
+        return((READ(Y_DIR_PIN)!=0) ^ INVERT_Y_DIR);
+    }
+    static inline bool getXDirection()
+    {
+        return((READ(X_DIR_PIN)!=0) ^ INVERT_X_DIR);
+    }
     static inline uint8_t isLargeMachine()
     {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
@@ -299,6 +336,57 @@ public:
     static inline void setAdvanceActivated(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
+    }
+    static inline uint8_t isHomed()
+    {
+        return flag1 & PRINTER_FLAG1_HOMED;
+    }
+    static inline void setHomed(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
+    }
+    static inline uint8_t isAllKilled()
+    {
+        return flag1 & PRINTER_FLAG1_ALLKILLED;
+    }
+    static inline void setAllKilled(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ALLKILLED : flag1 & ~PRINTER_FLAG1_ALLKILLED);
+    }
+    static inline uint8_t isAutomount()
+    {
+        return flag1 & PRINTER_FLAG1_AUTOMOUNT;
+    }
+    static inline void setAutomount(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
+    }
+    static inline uint8_t isAnimation()
+    {
+        return flag1 & PRINTER_FLAG1_ANIMATION;
+    }
+    static inline void setAnimation(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
+    }
+    static inline uint8_t isUIErrorMessage()
+    {
+        return flag1 & PRINTER_FLAG1_UI_ERROR_MESSAGE;
+    }
+    static inline void setUIErrorMessage(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
+    }
+    static inline uint8_t isNoDestinationCheck()
+    {
+        return flag1 & PRINTER_FLAG1_NO_DESTINATION_CHECK;
+    }
+    static inline void setNoDestinationCheck(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
+    }
+    static inline void toggleAnimation() {
+        setAnimation(!isAnimation());
     }
     static inline float convertToMM(float x)
     {
@@ -363,6 +451,9 @@ public:
     static inline void unsetAllSteppersDisabled()
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
+#if FAN_BOARD_PIN>-1
+    pwm_pos[NUM_EXTRUDER+1] = 255;
+#endif // FAN_BOARD_PIN
     }
     static inline bool isAnyTempsensorDefect()
     {
@@ -458,7 +549,7 @@ public:
         ANALYZER_OFF(ANALYZER_CH6);
         ANALYZER_OFF(ANALYZER_CH7);
     }
-    static inline unsigned int updateStepsPerTimerCall(unsigned int vbase)
+    static inline speed_t updateStepsPerTimerCall(speed_t vbase)
     {
         if(vbase>STEP_DOUBLER_FREQUENCY)
         {
@@ -525,7 +616,7 @@ public:
     }
     static void constrainDestinationCoords();
     static void updateDerivedParameter();
-    static void updateCurrentPosition();
+    static void updateCurrentPosition(bool copyLastCmd = false);
     static void kill(uint8_t only_steppers);
     static void updateAdvanceFlags();
     static void setup();
@@ -535,15 +626,16 @@ public:
     static void moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
     static void setOrigin(float xOff,float yOff,float zOff);
+    static bool isPositionAllowed(float x,float y,float z);
     static inline int getFanSpeed() {
         return (int)pwm_pos[NUM_EXTRUDER+2];
     }
-#if DRIVE_SYSTEM==3
+#if NONLINEAR_SYSTEM
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
-        currentDeltaPositionSteps[0] = xaxis;
-        currentDeltaPositionSteps[1] = yaxis;
-        currentDeltaPositionSteps[2] = zaxis;
+        currentDeltaPositionSteps[X_AXIS] = xaxis;
+        currentDeltaPositionSteps[Y_AXIS] = yaxis;
+        currentDeltaPositionSteps[Z_AXIS] = zaxis;
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif
@@ -551,7 +643,7 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-    static float runZProbe(bool first,bool last);
+    static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
 #if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
@@ -560,6 +652,11 @@ public:
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
 #endif
+#if FEATURE_MEMORY_POSITION
+    static void MemoryPosition();
+    static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
+#endif
+    static void zBabystep();
 private:
     static void homeXAxis();
     static void homeYAxis();

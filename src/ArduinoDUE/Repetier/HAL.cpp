@@ -33,7 +33,9 @@ extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
 volatile uint8_t HAL::insideTimer1=0;
-
+#ifndef DUE_SOFTWARE_SPI
+    int spiDueDividors[] = {10,21,42,84,168,255,255};
+#endif
 
 HAL::HAL()
 {
@@ -46,10 +48,7 @@ HAL::~HAL()
 }
 
 
-long HAL::CPUDivU2(unsigned int divisor)
-{
-    return F_CPU/divisor;
-}
+
 
 // Set up all timer interrupts 
 void HAL::setupTimer() {
@@ -227,6 +226,120 @@ void HAL::resetHardware() {
     RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
 }
 
+
+#ifndef DUE_SOFTWARE_SPI
+   // hardware SPI
+   void HAL::spiBegin()
+   {
+        // Configre SPI pins
+        PIO_Configure(
+           g_APinDescription[SCK_PIN].pPort,
+           g_APinDescription[SCK_PIN].ulPinType,
+           g_APinDescription[SCK_PIN].ulPin,
+           g_APinDescription[SCK_PIN].ulPinConfiguration);
+        PIO_Configure(
+           g_APinDescription[MOSI_PIN].pPort,
+           g_APinDescription[MOSI_PIN].ulPinType,
+           g_APinDescription[MOSI_PIN].ulPin,
+           g_APinDescription[MOSI_PIN].ulPinConfiguration);
+        PIO_Configure(
+           g_APinDescription[MISO_PIN].pPort,
+           g_APinDescription[MISO_PIN].ulPinType,
+           g_APinDescription[MISO_PIN].ulPin,
+           g_APinDescription[MISO_PIN].ulPinConfiguration);
+
+        // set master mode, peripheral select, fault detection
+        SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR | 
+                     SPI_MR_MODFDIS | SPI_MR_PS);
+       SPI_Enable(SPI0);
+        PIO_Configure(
+           g_APinDescription[SPI_PIN].pPort,
+           g_APinDescription[SPI_PIN].ulPinType,
+           g_APinDescription[SPI_PIN].ulPin,
+           g_APinDescription[SPI_PIN].ulPinConfiguration);
+        spiInit(1);
+   }
+   // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
+   // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
+    void HAL::spiInit(uint8_t spiClock) 
+   {
+        if(spiClock>4) spiClock = 1;
+        // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
+        SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
+                         SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | 
+                         SPI_CSR_DLYBCT(1));
+       SPI_Enable(SPI0);
+   }
+    // Write single byte to SPI
+   void HAL::spiSend(byte b) {
+        // wait for transmit register empty
+        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+        // write byte with address and end transmission flag
+        SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
+        // wait for receive register 
+        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+        // clear status
+        SPI0->SPI_RDR;
+    }
+   void HAL::spiSend(const uint8_t* buf , size_t n)
+   {
+       if (n == 0) return;
+       for (int i=0; i<n-1; i++)
+       {
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
+           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           SPI0->SPI_RDR;
+       }
+       spiSend(buf[n-1]);
+   }
+
+    // Read single byte from SPI
+   uint8_t HAL::spiReceive()
+   {
+        // wait for transmit register empty
+        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+        // write dummy byte with address and end transmission flag
+        SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
+
+        // wait for receive register 
+        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+        // get byte from receive register
+        return SPI0->SPI_RDR;
+   }
+    // Read from SPI into buffer
+   void HAL::spiReadBlock(uint8_t*buf,uint16_t nbyte) 
+   {     
+       if (nbyte-- == 0) return;
+
+       for (int i=0; i<nbyte; i++)
+        {
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN);
+           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           buf[i] = SPI0->SPI_RDR;
+        }
+       buf[nbyte] = spiReceive();
+   }
+
+    // Write from buffer to SPI
+
+   void HAL::spiSendBlock(uint8_t token, const uint8_t* buf)
+   {
+       while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+       SPI0->SPI_TDR = (uint32_t)token | SPI_PCS(SPI_CHAN);
+       while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+       SPI0->SPI_RDR;
+       for (int i=0; i<511; i++)
+       {
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
+           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           SPI0->SPI_RDR;
+       }
+       spiSend(buf[511]);
+   }
+#endif
 
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
@@ -444,7 +557,7 @@ void HAL::microsecondsWait(uint32_t us)
     usStart =  TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL);
 
     // funny math here to give good accuracy with no overflow 
-    goal = usStart + ((F_CPU_TRUE / (DELAY_TIMER_PRESCALE * 100000)) * us) / 10;
+    goal = usStart + 10*us-5; //((F_CPU_TRUE / (DELAY_TIMER_PRESCALE * 100000)) * us) / 10;
 
     // goal may have wrapped, if so wait for counter to catch up
     if(goal < usStart) {
@@ -564,9 +677,10 @@ inline void setTimer(unsigned long delay)
     // convert old AVR timer delay value for SAM timers
     uint32_t timer_count = (delay * TIMER1_PRESCALE);
 
-    if(timer_count == 0) timer_count = 1;
+    if(timer_count < 210) timer_count = 210;
     TC_SetRC(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, timer_count);
-    TC_Start(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
+    if(TC_ReadCV(TIMER1_TIMER,TIMER1_TIMER_CHANNEL)>timer_count)
+      TC_Start(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
 }
 
 /** \brief Timer interrupt routine to drive the stepper motors.
@@ -583,6 +697,10 @@ void TIMER1_COMPA_VECTOR ()
         HAL::allowInterrupts();
     }
     else
+    if(Printer::zBabystepsMissing != 0) {
+        Printer::zBabystep();
+        setTimer(Printer::interval);
+    } else
     {
         if(waitRelax==0)
         {
@@ -602,10 +720,35 @@ void TIMER1_COMPA_VECTOR ()
 #endif
         }
         else waitRelax--;
+        setTimer(10000);
     }
     DEBUG_MEMORY;
     HAL::insideTimer1=0;
 }
+
+#if !defined(HEATER_PWM_SPEED)
+#define HEATER_PWM_SPEED 0
+#endif
+#if HEATER_PWM_SPEED<0
+#define HEATER_PWM_SPEED 0
+#endif
+#if HEATER_PWM_SPEED>3
+#define HEATER_PWM_SPEED 3
+#endif
+
+#if HEATER_PWM_SPEED == 0
+#define HEATER_PWM_STEP 1
+#define HEATER_PWM_MASK 255
+#elif HEATER_PWM_SPEED == 1
+#define HEATER_PWM_STEP 2
+#define HEATER_PWM_MASK 254
+#elif HEATER_PWM_SPEED == 2
+#define HEATER_PWM_STEP 4
+#define HEATER_PWM_MASK 252
+#else
+#define HEATER_PWM_STEP 4
+#define HEATER_PWM_MASK 252
+#endif
 
 /**
 This timer is called 3906 times per second. It is used to update
@@ -617,43 +760,60 @@ void PWM_TIMER_VECTOR ()
     TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
 
     static uint8_t pwm_count = 0;
+    static uint8_t pwm_count_heater = 0;
     static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
 
     if(pwm_count==0)
     {
 #if EXT0_HEATER_PIN>-1
-        if((pwm_pos_set[0] = pwm_pos[0])>0) WRITE(EXT0_HEATER_PIN,1);
-#if EXT0_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
-#endif
+        if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-        if((pwm_pos_set[1] = pwm_pos[1])>0) WRITE(EXT1_HEATER_PIN,1);
-#if EXT1_EXTRUDER_COOLER_PIN>-1
+        if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK))>0) WRITE(EXT1_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
+        if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK))>0) WRITE(EXT2_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
+        if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK))>0) WRITE(EXT3_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
+        if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK))>0) WRITE(EXT4_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
+        if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK))>0) WRITE(EXT5_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
+        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+    }
+    if(pwm_count==0)
+    {
+#if EXT0_HEATER_PIN>-1 && EXT0_EXTRUDER_COOLER_PIN>-1
+        if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
+#endif
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
+#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
         if((pwm_cooler_pos_set[1] = extruder[1].coolerPWM)>0) WRITE(EXT1_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-        if((pwm_pos_set[2] = pwm_pos[2])>0) WRITE(EXT2_HEATER_PIN,1);
 #if EXT2_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[2] = extruder[2].coolerPWM)>0) WRITE(EXT2_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-        if((pwm_pos_set[3] = pwm_pos[3])>0) WRITE(EXT3_HEATER_PIN,1);
 #if EXT3_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[3] = extruder[3].coolerPWM)>0) WRITE(EXT3_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-        if((pwm_pos_set[4] = pwm_pos[4])>0) WRITE(EXT4_HEATER_PIN,1);
 #if EXT4_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[4] = pwm_pos[4].coolerPWM)>0) WRITE(EXT4_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-        if((pwm_pos_set[5] = pwm_pos[5])>0) WRITE(EXT5_HEATER_PIN,1);
 #if EXT5_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[5] = extruder[5].coolerPWM)>0) WRITE(EXT5_EXTRUDER_COOLER_PIN,1);
 #endif
@@ -664,61 +824,58 @@ void PWM_TIMER_VECTOR ()
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         if((pwm_pos_set[NUM_EXTRUDER+2] = pwm_pos[NUM_EXTRUDER+2])>0) WRITE(FAN_PIN,1);
 #endif
-#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,1);
-#endif
     }
 #if EXT0_HEATER_PIN>-1
-    if(pwm_pos_set[0] == pwm_count && pwm_pos_set[0]!=255) WRITE(EXT0_HEATER_PIN,0);
+    if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0]!=HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT0_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[0] == pwm_count && pwm_cooler_pos_set[0]!=255) WRITE(EXT0_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-    if(pwm_pos_set[1] == pwm_count && pwm_pos_set[1]!=255) WRITE(EXT1_HEATER_PIN,0);
-#if EXT1_EXTRUDER_COOLER_PIN>-1
+    if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
+#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
     if(pwm_cooler_pos_set[1] == pwm_count && pwm_cooler_pos_set[1]!=255) WRITE(EXT1_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-    if(pwm_pos_set[2] == pwm_count && pwm_pos_set[2]!=255) WRITE(EXT2_HEATER_PIN,0);
+    if(pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2]!=HEATER_PWM_MASK) WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT2_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[2] == pwm_count && pwm_cooler_pos_set[2]!=255) WRITE(EXT2_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-    if(pwm_pos_set[3] == pwm_count && pwm_pos_set[3]!=255) WRITE(EXT3_HEATER_PIN,0);
+    if(pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3]!=HEATER_PWM_MASK) WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT3_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[3] == pwm_count && pwm_cooler_pos_set[3]!=255) WRITE(EXT3_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-    if(pwm_pos_set[4] == pwm_count && pwm_pos_set[4]!=255) WRITE(EXT4_HEATER_PIN,0);
+    if(pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4]!=HEATER_PWM_MASK) WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT4_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[4] == pwm_count && pwm_cooler_pos_set[4]!=255) WRITE(EXT4_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-    if(pwm_pos_set[5] == pwm_count && pwm_pos_set[5]!=255) WRITE(EXT5_HEATER_PIN,0);
+    if(pwm_pos_set[5] == pwm_count_heater && pwm_pos_set[5]!=HEATER_PWM_MASK) WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT5_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[5] == pwm_count && pwm_cooler_pos_set[5]!=255) WRITE(EXT5_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if FAN_BOARD_PIN>-1
-    if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_BOARD_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER+1] == pwm_count && pwm_pos_set[NUM_EXTRUDER+1]!=255) WRITE(FAN_BOARD_PIN,0);
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);
 #endif
 #if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count && pwm_pos_set[NUM_EXTRUDER]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER]!=HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
     HAL::allowInterrupts();
-    counter_periodical++; // Appxoimate a 100ms timer
-    if(counter_periodical >= 390) //  (int)(F_CPU/40960))
+    counterPeriodical++; // Appxoimate a 100ms timer
+    if(counterPeriodical >= 390) //  (int)(F_CPU/40960))
     {
-        counter_periodical=0;
-        execute_periodical=1;
+        counterPeriodical=0;
+        executePeriodical=1;
     }
 // read analog values -- only read one per interrupt
 #if ANALOG_INPUTS>0
@@ -758,6 +915,7 @@ void PWM_TIMER_VECTOR ()
 #endif
     UI_FAST; // Short timed user interface action
     pwm_count++;
+    pwm_count_heater += HEATER_PWM_STEP;
 }
 
 
