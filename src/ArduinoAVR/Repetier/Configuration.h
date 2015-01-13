@@ -1031,7 +1031,7 @@ instead of driving both with a single stepper. The same works for the other axis
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
-#define FEATURE_DITTO_PRINTING true
+#define FEATURE_DITTO_PRINTING false
 
 /* Servos
 
