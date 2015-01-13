@@ -352,40 +352,17 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_epos,UI_TEXT_E_POSITION,ui_menu_epos);
 UI_MENU_ACTIONSELECTOR(ui_menu_go_xfast,UI_TEXT_X_POS_FAST,ui_menu_xpos_fast);
 UI_MENU_ACTIONSELECTOR(ui_menu_go_yfast,UI_TEXT_Y_POS_FAST,ui_menu_ypos_fast);
 UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast,UI_TEXT_Z_POS_FAST,ui_menu_zpos_fast);
-<<<<<<< HEAD
-=======
 UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast_notest,UI_TEXT_Z_POS_FAST,ui_menu_zpos_fast_notest);
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #define UI_SPEED 2
 #define UI_SPEED_X ,&ui_menu_go_xfast,&ui_menu_go_xpos
 #define UI_SPEED_Y ,&ui_menu_go_yfast,&ui_menu_go_ypos
 #define UI_SPEED_Z ,&ui_menu_go_zfast,&ui_menu_go_zpos
-<<<<<<< HEAD
-=======
 #define UI_SPEED_Z_NOTEST ,&ui_menu_go_zfast_notest,&ui_menu_go_zpos_notest
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #else
 #define UI_SPEED 1
 #define UI_SPEED_X ,&ui_menu_go_xpos
 #define UI_SPEED_Y ,&ui_menu_go_ypos
 #define UI_SPEED_Z ,&ui_menu_go_zpos
-<<<<<<< HEAD
-#endif
-
-#if DRIVE_SYSTEM!=3     //Positioning menu for non-delta
-#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
-UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5+3*UI_SPEED+UI_MENU_BACKCNT);
-#else                   //Positioning menu for delta (removes individual x,y,z homing)
-#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all  UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
-UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,2+3*UI_SPEED+UI_MENU_BACKCNT);
-#endif
-
-// **** Delta calibration menu
-#ifdef Z_HOME_DIR < 0
-UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI_ACTION_SET_MEASURED_ORIGIN);
-#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z,&ui_menu_set_measured_origin}
-UI_MENU(ui_menu_delta,UI_MENU_DELTA,2+UI_SPEED+UI_MENU_BACKCNT);
-=======
 #define UI_SPEED_Z_NOTEST ,&ui_menu_go_zpos_notest
 #endif
 
@@ -402,7 +379,6 @@ UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,2 + 3 * UI_SPEED + UI_MENU_BACKCNT);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI_ACTION_SET_MEASURED_ORIGIN);
 #define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z_NOTEST,&ui_menu_set_measured_origin}
 UI_MENU(ui_menu_delta,UI_MENU_DELTA,2 + UI_SPEED + UI_MENU_BACKCNT);
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #endif
 
 // **** Bed leveling menu
@@ -411,11 +387,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
 UI_MENU_ACTIONCOMMAND(ui_menu_calculate_leveling,UI_TEXT_CALCULATE_LEVELING,UI_ACTION_CALC_LEVEL);
-<<<<<<< HEAD
-#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling UI_SPEED_X UI_SPEED_Y UI_SPEED_z}
-=======
 #define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling UI_SPEED_X UI_SPEED_Y UI_SPEED_Z}
->>>>>>> v1.1.0-to-v1.0.0-backporting
 UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT);
 #endif
 
@@ -544,13 +516,8 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MO
 #define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
 #endif
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
-<<<<<<< HEAD
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
-UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+4+UI_MOUNT_CNT);
-=======
 #define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_stop,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
 UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+5+UI_MOUNT_CNT);
->>>>>>> v1.1.0-to-v1.0.0-backporting
 UI_MENU_SUBMENU(ui_menu_sd_sub,UI_TEXT_SD_CARD,ui_menu_sd);
 
 #define UI_MENU_SD_COND &ui_menu_sd_sub,
@@ -694,11 +661,7 @@ UI_MENU_SUBMENU(ui_menu_conf_level, UI_TEXT_LEVEL, ui_menu_level);
 #define UI_MENU_SL_COND
 #define UI_MENU_SL_CNT 0
 #endif
-<<<<<<< HEAD
-#ifdef Z_HOME_DIR<0
-=======
 #if Z_HOME_DIR > 0
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #define UI_MENU_DELTA_COND ,&ui_menu_conf_delta
 #define UI_MENU_DELTA_CNT 1
 UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_ZCALIB, ui_menu_delta);

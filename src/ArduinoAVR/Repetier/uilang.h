@@ -254,11 +254,8 @@
 #define UI_TEXT_POWER            "ATX power on/off"
 #define UI_TEXT_STRING_HM_DEADTIME     "Dead Time"
 #define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
-<<<<<<< HEAD
-=======
 #define UI_TEXT_STOP_PRINT "Stop Print"
 #define UI_TEXT_Z_BABYSTEPPING "Z Babystepping"
->>>>>>> v1.1.0-to-v1.0.0-backporting
 
 // *************** German translation ****************
 
@@ -434,11 +431,8 @@
 #define UI_TEXT_POWER            "ATX Netzteil an/aus"
 #define UI_TEXT_STRING_HM_DEADTIME     "Totzeit"
 #define UI_TEXT_STRING_HM_SLOWBANG     "Langs.BB"
-<<<<<<< HEAD
-=======
 #define UI_TEXT_STOP_PRINT "Druck abbrechen"
 #define UI_TEXT_Z_BABYSTEPPING "Z Babyschritte"
->>>>>>> v1.1.0-to-v1.0.0-backporting
 
 #endif
 
@@ -1372,9 +1366,6 @@
 #define UI_TEXT_POWER            "ATX power on/off"
 #define UI_TEXT_STRING_HM_DEADTIME     "Dead Time"
 #define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
-<<<<<<< HEAD
-=======
 #define UI_TEXT_STOP_PRINT "Stop Print"
->>>>>>> v1.1.0-to-v1.0.0-backporting
 
 #endif

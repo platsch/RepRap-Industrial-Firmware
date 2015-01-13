@@ -86,11 +86,7 @@ long Printer::realDeltaPositionSteps[3];
 int16_t Printer::travelMovesPerSecond;
 int16_t Printer::printMovesPerSecond;
 #endif
-<<<<<<< HEAD
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
-=======
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
->>>>>>> v1.1.0-to-v1.0.0-backporting
 long Printer::stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3
@@ -199,11 +195,8 @@ bool Printer::isPositionAllowed(float x,float y,float z) {
 void Printer::updateDerivedParameter()
 {
 #if DRIVE_SYSTEM==3
-<<<<<<< HEAD
-=======
     travelMovesPerSecond = EEPROM::deltaSegmentsPerSecondMove();
     printMovesPerSecond = EEPROM::deltaSegmentsPerSecondPrint();
->>>>>>> v1.1.0-to-v1.0.0-backporting
     axisStepsPerMM[X_AXIS] = axisStepsPerMM[Y_AXIS] = axisStepsPerMM[Z_AXIS];
     maxAccelerationMMPerSquareSecond[X_AXIS] = maxAccelerationMMPerSquareSecond[Y_AXIS] = maxAccelerationMMPerSquareSecond[Z_AXIS];
     homingFeedrate[X_AXIS] = homingFeedrate[Y_AXIS] = homingFeedrate[Z_AXIS];
@@ -855,9 +848,9 @@ void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 {
     bool all = !(x || y || z);
     float oldFeedrate = feedrate;
-    moveToReal((all || x ? memoryX : IGNORE_COORDINATE)
-               ,(all || y ? memoryY : IGNORE_COORDINATE)
-               ,(all || z ? memoryZ : IGNORE_COORDINATE)
+    moveToReal((all || x ? (lastCmdPos[X_AXIS] = memoryX) : IGNORE_COORDINATE)
+               ,(all || y ?(lastCmdPos[Y_AXIS] = memoryY) : IGNORE_COORDINATE)
+               ,(all || z ? (lastCmdPos[Z_AXIS] = memoryZ) : IGNORE_COORDINATE)
                ,(e ? memoryE:IGNORE_COORDINATE),
                feed);
     feedrate = oldFeedrate;

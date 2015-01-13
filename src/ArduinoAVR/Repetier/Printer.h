@@ -97,11 +97,7 @@ public:
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
 #endif
-<<<<<<< HEAD
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
-=======
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
->>>>>>> v1.1.0-to-v1.0.0-backporting
     static long stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3

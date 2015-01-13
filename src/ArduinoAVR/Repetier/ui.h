@@ -152,11 +152,6 @@
 #define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
-<<<<<<< HEAD
-#define UI_ACTION_OUT_OF_FILAMENT_LEFT            1900 // left filament endswitch triggered
-#define UI_ACTION_OUT_OF_FILAMENT_RIGHT           1901 // right filament endswitch triggered
-
-=======
 #define UI_ACTION_LIGHTS_ONOFF          1107
 #define UI_ACTION_SD_STOP               1108
 #define UI_ACTION_ZPOSITION_NOTEST      1109
@@ -168,7 +163,6 @@
 #define UI_ACTION_OUT_OF_FILAMENT_RIGHT 1901 // right filament endswitch triggered
 #define UI_ACTION_CHAMBER_HEATER_OVERTEMP_LEFT  1902 // left chamber heater over-temp safety switch
 #define UI_ACTION_CHAMBER_HEATER_OVERTEMP_RIGHT 1903 // right chamber heater over-temp safety switch
->>>>>>> v1.1.0-to-v1.0.0-backporting
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -495,7 +489,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_D7_PIN      40
 #define UI_ENCODER_A           12
 #define UI_ENCODER_B           11
-#define UI_ENCODER_CLICK       36
+#define UI_ENCODER_CLICK       43
 #define UI_RESET_PIN           46
 #else
 #define BEEPER_PIN             37
@@ -526,7 +520,7 @@ void ui_init_keys() {
 }
 void ui_check_keys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_RESET); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
 inline void ui_check_slow_encoder() {}
@@ -534,11 +528,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 2 and 10
 
-<<<<<<< HEAD
-#if FEATURE_CONTROLLER==11 // RepRap Industrial Out-Of-Filament Endswitches on RUMBA
-=======
 #if FEATURE_CONTROLLER==99 // RepRap Industrial Out-Of-Filament Endswitches on RUMBA
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE 1
@@ -564,13 +554,10 @@ void ui_init_keys() {
   // Out-of-Filament Endswitches  
   UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_RIGHT_PIN); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(OUT_OF_FILAMENT_LEFT_PIN); // push button, connects gnd to pin  
-<<<<<<< HEAD
-=======
 
   // Chamber Heater overtemp safety switches
   UI_KEYS_INIT_BUTTON_LOW(CHAMBER_HEATER_OVERTEMP_LEFT_PIN); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(CHAMBER_HEATER_OVERTEMP_RIGHT_PIN); // push button, connects gnd to pin  
->>>>>>> v1.1.0-to-v1.0.0-backporting
 }
 void ui_check_keys(int &action) {
   
@@ -602,12 +589,9 @@ void ui_check_keys(int &action) {
   if( !out_of_filament_right_old && out_of_filament_right_new ) { // state changed from false to true
     uid.executeAction(UI_ACTION_OUT_OF_FILAMENT_RIGHT);
   }
-<<<<<<< HEAD
-  out_of_filament_right_old = out_of_filament_right_new;  
-    
-=======
   out_of_filament_right_old = out_of_filament_right_new; 
 
+/*
   // LEFT CHAMBER HEATER OVERTEMP SWITCH
   static boolean chamber_heater_overtemp_left = false;
   if ( READ(CHAMBER_HEATER_OVERTEMP_LEFT_PIN) == 1 && !chamber_heater_overtemp_left) { // switch is open, not pulled to GND anymore
@@ -621,8 +605,8 @@ void ui_check_keys(int &action) {
     chamber_heater_overtemp_right = true;
     uid.executeAction(UI_ACTION_CHAMBER_HEATER_OVERTEMP_RIGHT);
   }
-
->>>>>>> v1.1.0-to-v1.0.0-backporting
+*/
+  
 /*
   static boolean out_of_filament_left = false;
   int read_left = READ(OUT_OF_FILAMENT_LEFT_PIN);
@@ -645,14 +629,10 @@ void ui_check_keys(int &action) {
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
-<<<<<<< HEAD
-#endif // Controller 11
-=======
 #endif // Controller 99
     
 
 
->>>>>>> v1.1.0-to-v1.0.0-backporting
 
 #if FEATURE_CONTROLLER==3 // Adafruit RGB controller
 #define UI_HAS_KEYS 1

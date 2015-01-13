@@ -2045,27 +2045,20 @@ void UIDisplay::adjustMenuPos()
 
 void UIDisplay::nextPreviousAction(int8_t next)
 {
-<<<<<<< HEAD
-=======
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
         return;
     }
->>>>>>> v1.1.0-to-v1.0.0-backporting
     millis_t actTime = HAL::timeInMilliseconds();
     millis_t dtReal;
     millis_t dt = dtReal = actTime-lastNextPrev;
     lastNextPrev = actTime;
     if(dt<SPEED_MAX_MILLIS) dt = SPEED_MAX_MILLIS;
-<<<<<<< HEAD
-    if(dt>SPEED_MIN_MILLIS) {dt = SPEED_MIN_MILLIS;lastNextAccumul = 1;}
-=======
     if(dt>SPEED_MIN_MILLIS)
     {
         dt = SPEED_MIN_MILLIS;
         lastNextAccumul = 1;
     }
->>>>>>> v1.1.0-to-v1.0.0-backporting
     float f = (float)(SPEED_MIN_MILLIS-dt)/(float)(SPEED_MIN_MILLIS-SPEED_MAX_MILLIS);
     lastNextAccumul = 1.0f+(float)SPEED_MAGNIFICATION*f*f*f;
 
@@ -2144,51 +2137,6 @@ void UIDisplay::nextPreviousAction(int8_t next)
         break;
     case UI_ACTION_XPOSITION:
 #if UI_SPEEDDEPENDENT_POSITIONING
-<<<<<<< HEAD
-        {
-            float d = 0.01*(float)increment*lastNextAccumul;
-            if(fabs(d)*2000>Printer::maxFeedrate[X_AXIS]*dtReal)
-                d *= Printer::maxFeedrate[X_AXIS]*dtReal/(2000*fabs(d));
-            long steps = (long)(d*Printer::axisStepsPerMM[X_AXIS]);
-            steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInSteps(steps,0,0,0,Printer::maxFeedrate[2],true,true);
-        }
-#else
-        PrintLine::moveRelativeDistanceInSteps(increment,0,0,0,Printer::homingFeedrate[0],true,true);
-#endif
-        Commands::printCurrentPosition();
-        break;
-    case UI_ACTION_YPOSITION:
-#if UI_SPEEDDEPENDENT_POSITIONING
-        {
-            float d = 0.01*(float)increment*lastNextAccumul;
-            if(fabs(d)*2000>Printer::maxFeedrate[Y_AXIS]*dtReal)
-                d *= Printer::maxFeedrate[Y_AXIS]*dtReal/(2000*fabs(d));
-            long steps = (long)(d*Printer::axisStepsPerMM[Y_AXIS]);
-            steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInSteps(0,steps,0,0,Printer::maxFeedrate[2],true,true);
-        }
-#else
-        PrintLine::moveRelativeDistanceInSteps(0,increment,0,0,Printer::homingFeedrate[1],true,true);
-#endif
-        Commands::printCurrentPosition();
-        break;
-    case UI_ACTION_ZPOSITION:
-#if UI_SPEEDDEPENDENT_POSITIONING
-        {
-            float d = 0.01*(float)increment*lastNextAccumul;
-            if(fabs(d)*2000>Printer::maxFeedrate[Z_AXIS]*dtReal)
-                d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
-            long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
-            steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInSteps(0,0,steps,0,Printer::maxFeedrate[2],true,true);
-        }
-#else
-        PrintLine::moveRelativeDistanceInSteps(0,0,increment,0,Printer::homingFeedrate[2],true,true);
-#endif
-        Commands::printCurrentPosition();
-        break;
-=======
     {
         float d = 0.01*(float)increment*lastNextAccumul;
         if(fabs(d)*2000>Printer::maxFeedrate[X_AXIS]*dtReal)
@@ -2232,7 +2180,6 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #endif
     Commands::printCurrentPosition();
     break;
->>>>>>> v1.1.0-to-v1.0.0-backporting
     case UI_ACTION_XPOSITION_FAST:
         PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[0]*increment,0,0,0,Printer::homingFeedrate[0],true);
         Commands::printCurrentPosition();
@@ -2887,26 +2834,17 @@ void UIDisplay::executeAction(int action)
         }
 #endif
         break;
-<<<<<<< HEAD
-        case UI_ACTION_SET_MEASURED_ORIGIN:
-        {
-=======
 #if MAX_HARDWARE_ENDSTOP_Z
         case UI_ACTION_SET_MEASURED_ORIGIN:
         {
             Printer::updateCurrentPosition();
->>>>>>> v1.1.0-to-v1.0.0-backporting
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
             transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
-<<<<<<< HEAD
-            Printer::updateCurrentPosition();
-=======
             Printer::updateCurrentPosition(true);
->>>>>>> v1.1.0-to-v1.0.0-backporting
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #if EEPROM_MODE!=0
             EEPROM::storeDataIntoEEPROM(false);
@@ -2914,11 +2852,8 @@ void UIDisplay::executeAction(int action)
 #endif
             Commands::printCurrentPosition();
         }
-<<<<<<< HEAD
-=======
         break;
 #endif
->>>>>>> v1.1.0-to-v1.0.0-backporting
         case UI_ACTION_SET_P1:
 #ifdef SOFTWARE_LEVELING
             for (uint8_t i=0; i<3; i++)
@@ -3011,16 +2946,7 @@ void UIDisplay::executeAction(int action)
             Com::printF(PSTR(" pos:"),sd.sdpos);
             Com::printFLN(PSTR(" of "),sd.filesize);
             break;
-<<<<<<< HEAD
-        case UI_ACTION_OUT_OF_FILAMENT_LEFT:// OUT_OF_FILAMENT_LEFT:
-            Com::printFLN(PSTR("OutOfFilament:left"));
-            break; 
-        case UI_ACTION_OUT_OF_FILAMENT_RIGHT: // OUT_OF_FILAMENT_RIGHT:
-            Com::printFLN(PSTR("OutOfFilament:right"));
-            break;             
-=======
 #endif
->>>>>>> v1.1.0-to-v1.0.0-backporting
         }
     refreshPage();
     if(!skipBeep)

@@ -1439,27 +1439,13 @@ void Commands::executeGCode(GCode *com)
             }
             break;
 #endif // FEATURE_SERVO
-<<<<<<< HEAD
-#if Z_HOME_DIR<0
-=======
 #if Z_HOME_DIR>0 && MAX_HARDWARE_ENDSTOP_Z
->>>>>>> v1.1.0-to-v1.0.0-backporting
         case 251:
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
             transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
-<<<<<<< HEAD
-#endif
-            Printer::updateCurrentPosition();
-            Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
-#if EEPROM_MODE!=0
-            EEPROM::storeDataIntoEEPROM(false);
-            Com::printFLN(Com::tEEPROMUpdated);
-#endif
-            Commands::printCurrentPosition();
-=======
 #endif
             Printer::updateCurrentPosition();
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
@@ -1489,7 +1475,6 @@ void Commands::executeGCode(GCode *com)
                 Com::printF(PSTR("Rem:"),PrintLine::cur->stepsRemaining);
                 Com::printFLN(PSTR("Int:"),Printer::interval);
             }
->>>>>>> v1.1.0-to-v1.0.0-backporting
             break;
 #endif // DEBUG_QUEUE_MOVE
 #ifdef DEBUG_SEGMENT_LENGTH
@@ -1499,8 +1484,6 @@ void Commands::executeGCode(GCode *com)
                 Printer::maxRealSegmentLength = 0;
             break;
 #endif
-<<<<<<< HEAD
-=======
 #ifdef DEBUG_REAL_JERK
             Com::printFLN(PSTR("Max. jerk measured:"),Printer::maxRealJerk);
             if(com->hasS())
@@ -1523,7 +1506,6 @@ void Commands::executeGCode(GCode *com)
             Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[Z_AXIS]);
 #endif // NONLINEAR_SYSTEM
             break;*/
->>>>>>> v1.1.0-to-v1.0.0-backporting
         }
     }
     else if(com->hasT())      // Process T code

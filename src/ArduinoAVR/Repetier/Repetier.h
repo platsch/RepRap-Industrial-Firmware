@@ -23,7 +23,7 @@
 #define _REPETIER_H
 
 #define REPETIER_VERSION "0.91"
-#define REPRAPINDUSTRIAL_FIRMWARE_VERSION "1.1.0-01"
+#define REPRAPINDUSTRIAL_FIRMWARE_VERSION "0.91-rri1.0.0-02"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -117,8 +117,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
-<<<<<<< HEAD
-=======
 #ifndef FEATURE_BABYSTEPPING
 #define FEATURE_BABYSTEPPING 0
 #define BABYSTEP_MULTIPLICATOR 1
@@ -129,7 +127,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define Z_PROBE_REPETITIONS 1
 #endif
 
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #define SPEED_MIN_MILLIS 300
 #define SPEED_MAX_MILLIS 50
 #define SPEED_MAGNIFICATION 100.0f
@@ -138,11 +135,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-<<<<<<< HEAD
-#if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4
-=======
 #if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4 || DRIVE_SYSTEM==5 || DRIVE_SYSTEM==6
->>>>>>> v1.1.0-to-v1.0.0-backporting
 #define NONLINEAR_SYSTEM true
 #else
 #define NONLINEAR_SYSTEM false
