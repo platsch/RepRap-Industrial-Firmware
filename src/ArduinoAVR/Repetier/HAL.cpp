@@ -906,6 +906,11 @@ ISR(PWM_TIMER_VECTOR)
 }
 #if defined(USE_ADVANCE)
 
+static int8_t extruderLastDirection = 0;
+void HAL::resetExtruderDirection() {
+  extruderLastDirection = 0;
+}
+
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optima result,
@@ -917,7 +922,6 @@ allowable speed for the extruder.
 */
 ISR(EXTRUDER_TIMER_VECTOR)
 {
-    static int8_t extruderLastDirection = 0;
     uint8_t timer = EXTRUDER_OCR;
     if(!Printer::isAdvanceActivated()) return; // currently no need
     if(Printer::extruderStepsNeeded > 0 && extruderLastDirection!=1)
