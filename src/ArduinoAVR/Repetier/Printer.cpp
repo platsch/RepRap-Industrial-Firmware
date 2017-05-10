@@ -1016,7 +1016,7 @@ void Printer::homeXAxis()
 #if X_HOME_DIR < 0
             offX = RMath::max(offX,extruder[i].xOffset);
 #else
-            offX = RMath::min(offX,extruder[i].xOffset);
+            offX = RMath::min(offX,abs(extruder[i].xOffset));
 #endif
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
@@ -1048,7 +1048,7 @@ void Printer::homeYAxis()
 #if Y_HOME_DIR<0
             offY = RMath::max(offY,extruder[i].yOffset);
 #else
-            offY = RMath::min(offY,extruder[i].yOffset);
+            offY = RMath::min(offY,abs(extruder[i].yOffset));
 #endif
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
