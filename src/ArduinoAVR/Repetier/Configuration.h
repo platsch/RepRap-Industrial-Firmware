@@ -199,7 +199,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
-#define EXT0_INVERSE false
+#define EXT0_INVERSE true
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT0_ENABLE_ON false
@@ -282,16 +282,16 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 
 
-// =========================== Configuration for second extruder ========================
+// =========================== Configuration for second (syringe) extruder ========================
 #define EXT1_X_OFFSET 2078 // 1/16 microstepping
 #define EXT1_Y_OFFSET -21 // 1/16 microstepping
-#define EXT1_STEPS_PER_MM 500.69 // 1/8 microstepping
+#define EXT1_STEPS_PER_MM 800 // 1/8 microstepping
 #define EXT1_TEMPSENSOR_TYPE 1
 #define EXT1_TEMPSENSOR_PIN TEMP_1_PIN
 #define EXT1_HEATER_PIN HEATER_1_PIN
 #define EXT1_STEP_PIN E1_STEP_PIN
 #define EXT1_DIR_PIN E1_DIR_PIN
-#define EXT1_INVERSE true
+#define EXT1_INVERSE false
 #define EXT1_ENABLE_PIN E1_ENABLE_PIN
 #define EXT1_ENABLE_ON false
 #define EXT1_MAX_FEEDRATE 24
@@ -315,10 +315,10 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_EXTRUDER_COOLER_PIN -1
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 
-// =========================== Configuration for third extruder - used for chamber heaters ========================
+// =========================== Configuration for third extruder - used vacuum nozzle ========================
 #define EXT2_X_OFFSET 0
 #define EXT2_Y_OFFSET 0
-#define EXT2_STEPS_PER_MM 1
+#define EXT2_STEPS_PER_MM 8.8889
 #define EXT2_TEMPSENSOR_TYPE 1
 #define EXT2_TEMPSENSOR_PIN TEMP_2_PIN
 #define EXT2_HEATER_PIN HEATER_2_PIN
@@ -351,7 +351,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
-#define RETRACT_DURING_HEATUP true
+#define RETRACT_DURING_HEATUP false
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you
@@ -361,7 +361,7 @@ need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm h
 
 /** Prevent extrusions longer then x mm for one command. This is especially important if you abort a print. Then the
 extrusion poistion might be at any value like 23344. If you then have an G1 E-2 it will roll back 23 meter! */
-#define EXTRUDE_MAXLENGTH 100
+#define EXTRUDE_MAXLENGTH 10000
 /** Skip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
 #define SKIP_M109_IF_WITHIN 2
 
@@ -646,20 +646,20 @@ on this endstop.
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
-#define ALWAYS_CHECK_ENDSTOPS false
+#define ALWAYS_CHECK_ENDSTOPS true
 
 // maximum positions in mm - only fixed numbers!
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 280
+#define X_MAX_LENGTH 200
 #define Y_MAX_LENGTH 295
 #define Z_MAX_LENGTH 295
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
 #define X_MIN_POS -40
-#define Y_MIN_POS -115
+#define Y_MIN_POS -105
 #define Z_MIN_POS 0
 
 // ##########################################################################################
@@ -1004,7 +1004,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 134
+#define EEPROM_MODE 1//134
 
 
 /**************** duplicate motor driver ***************
@@ -1044,12 +1044,12 @@ Servos are controlled by a pulse width normally between 500 and 2500 with 1500ms
 WARNING: Servos can draw a considerable amount of current. Make sure your system can handle this or you may risk your hardware!
 */
 
-#define FEATURE_SERVO false
+#define FEATURE_SERVO true
 // Servo pins on a RAMPS board are 11,6,5,4
-#define SERVO0_PIN 11
-#define SERVO1_PIN 6
-#define SERVO2_PIN 5
-#define SERVO3_PIN 4
+#define SERVO0_PIN 40//33 // syringe and pnp servos
+#define SERVO1_PIN 41
+#define SERVO2_PIN -1
+#define SERVO3_PIN -1
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
 is always running and is not hung up for some unknown reason. */
