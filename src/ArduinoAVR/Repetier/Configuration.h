@@ -132,7 +132,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 /* You can write some GCODE to be executed on startup. Use this e.g. to set some 
 pins. Separate multiple GCODEs with \n
 */
-//#define STARTUP_GCODE ""
+#define STARTUP_GCODE "M81 \nM340 P0 S0 ;disable syringe servo\nM340 P1 S0 ;disable pnp servo\nM42 P33 S0 ;vacuum pump off"
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
