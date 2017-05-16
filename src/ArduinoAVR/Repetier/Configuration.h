@@ -444,8 +444,8 @@ cog. Direct drive extruder need 0. */
 #define EXT1_ADVANCE_BACKLASH_STEPS 61
 #define EXT1_WAIT_RETRACT_TEMP 150
 #define EXT1_WAIT_RETRACT_UNITS 0
-#define EXT1_SELECT_COMMANDS ""
-#define EXT1_DESELECT_COMMANDS ""
+#define EXT1_SELECT_COMMANDS "M340 P0 S2100 ;lower syringe"
+#define EXT1_DESELECT_COMMANDS "M340 P0 S1200 ;lift syringe"
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
 #define EXT1_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
@@ -743,7 +743,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 /** Dgain.  Overridden if EEPROM activated.*/
 #define HEATED_BED_PID_DGAIN 389.42
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
-#define HEATED_BED_PID_MAX 180
+#define HEATED_BED_PID_MAX 255
 // Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
 // beds need some time to get the temp. to the sensor. Time is in milliseconds! Set 0 to disable
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
@@ -918,7 +918,7 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 231
+#define X_MAX_LENGTH 300
 #define Y_MAX_LENGTH 295
 #define Z_MAX_LENGTH 295
 

@@ -1468,7 +1468,7 @@ void Printer::homeXAxis()
 #if NUM_EXTRUDER > 1
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
 #if X_HOME_DIR < 0
-            offX = RMath::max(offX,extruder[i].xOffset);
+            offX = 0;//RMath::max(offX,extruder[i].xOffset); // MODIFICATION FOR PNP SYSTEM BY FLORENS!!!
 #else
             offX = RMath::min(offX,abs(extruder[i].xOffset));
 #endif
@@ -1492,6 +1492,10 @@ void Printer::homeXAxis()
             PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * -ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, true);
 #endif
         currentPositionSteps[X_AXIS] = (X_HOME_DIR == -1) ? xMinSteps - offX : xMaxSteps + offX;
+        if(X_HOME_DIR == -1) // MODIFICATION FOR PNP SYSTEM BY FLORENS!!!
+        {
+          PrintLine::moveRelativeDistanceInSteps(xMinSteps * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, true);
+        }
 #if NONLINEAR_SYSTEM
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
@@ -1721,7 +1725,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #if HOMING_ORDER != HOME_ORDER_ZXYTZ
     if(xaxis)
     {
-        if(X_HOME_DIR < 0) startX = Printer::xMin;
+        if(X_HOME_DIR < 0) startX = 0; //Printer::xMin; // MODIFICATION FOR PNP by FLORENS
         else startX = Printer::xMin + Printer::xLength;
     }
     if(yaxis)
