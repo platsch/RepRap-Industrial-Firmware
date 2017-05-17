@@ -491,7 +491,7 @@ cog. Direct drive extruder need 0. */
 #define EXT2_DESELECT_COMMANDS ""
 #define EXT2_EXTRUDER_COOLER_PIN -1
 #define EXT2_EXTRUDER_COOLER_SPEED 255
-#define EXT2_DECOUPLE_TEST_PERIOD 18000
+#define EXT2_DECOUPLE_TEST_PERIOD 0
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
 #define RETRACT_DURING_HEATUP 0
