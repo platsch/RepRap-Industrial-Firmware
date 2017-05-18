@@ -1397,10 +1397,10 @@ to recalibrate z.
 */
 #define Z_PROBE_Z_OFFSET_MODE 0
 
-#define FEATURE_Z_PROBE 0
-#define Z_PROBE_PIN 63
+#define FEATURE_Z_PROBE 1
+#define Z_PROBE_PIN 38
 #define Z_PROBE_PULLUP 1
-#define Z_PROBE_ON_HIGH 1
+#define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
 #define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
@@ -1409,19 +1409,21 @@ to recalibrate z.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST 0
 /** Speed of z-axis in mm/s when probing */
-#define Z_PROBE_SPEED 2
+#define Z_PROBE_SPEED 5
 #define Z_PROBE_XY_SPEED 150
 #define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe after it was activated
-#define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point.
+#define Z_PROBE_REPETITIONS 4 // Repetitions for probing at one point.
+#define G134_REPETITIONS 2 // 2 time 4 probes for each extruder
+#define G134_PRECISION 0.05
 /** Distance between nozzle and bed when probe triggers. */
-#define Z_PROBE_HEIGHT 39.91
+#define Z_PROBE_HEIGHT 30.00
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 /** Set 1 if you need a hot extruder for good probe results. Normally only required if nozzle is probe. */
 #define Z_PROBE_REQUIRES_HEATING 0
 /** Minimum extruder temperature for probing. If it is lower, it will be increased to that value. */
-#define Z_PROBE_MIN_TEMPERATURE 150
+#define Z_PROBE_MIN_TEMPERATURE 10
 
 /*
 Define how we measure the bed rotation. 
