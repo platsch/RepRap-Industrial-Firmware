@@ -762,6 +762,11 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 void Printer::setup()
 {
     HAL::stopWatchdog();
+//Modification for front button
+#if defined(FRONT_BUTTON_PIN)
+    SET_INPUT(FRONT_BUTTON_PIN);
+    PULLUP(FRONT_BUTTON_PIN, HIGH);
+#endif
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER

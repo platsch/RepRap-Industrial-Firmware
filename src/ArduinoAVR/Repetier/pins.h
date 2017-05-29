@@ -712,6 +712,8 @@ STEPPER_CURRENT_CONTROL
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 
+#define FRONT_BUTTON_PIN 14
+
 #endif //MOTHERBOARD==80
 
 /****************************************************************************************
